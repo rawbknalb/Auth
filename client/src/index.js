@@ -1,6 +1,5 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import "./index.css";
 
 // Components
 import App from "./components/App";
@@ -22,6 +21,11 @@ const store = createStore(
   rootReducer,
   composeWithDevTools(applyMiddleware(reduxThunk))
 );
+
+const token = localStorage.getItem("token");
+if (token) {
+  store.dispatch({ type: "AUTH_USER" });
+}
 
 const rootEl = document.getElementById("root");
 

@@ -1,25 +1,60 @@
 import React, { Component } from "react";
+import { connect } from "react-redux";
 import "../App.css";
 
 // React Router
-import { Route } from "react-router";
+import { Route, Redirect } from "react-router";
+import ProtectedRoute from "./routes/ProtectedRoute";
 
 // Components
 import Header from "./layout/Header";
-import Signin from "./auth/Signin";
+import SignIn from "./auth/SignIn";
+import SignUp from "./auth/SignUp";
+import Dashboard from "./Dashboard";
 import Home from "./Home";
 
 class App extends Component {
+  // redirectAfterAuth = () =>
+  // If user is authenticated and calls /sign
+  // this.isAuthenticated ? <Redirect push to="/dashboard" /> : <SignIn />;
+
+  redirectWhenAuthd = component =>
+    this.props.isAuthenticated ? <Redirect push to="/dashboard" /> : component;
+
+  redirectWhenUnAthd = () =>
+    !this.props.isAuthenticated && <Redirect push to="/" />;
+
   render() {
     const { match } = this.props;
     return (
-      <div className="App">
+      <div>
         <Header />
-        <Route exact path={match.url} component={Home} />
-        <Route path="/signin" component={Signin} />
+        <div className="App">
+          <Route exact path={match.url} component={Home} />
+          <Route
+            path="/signin"
+            render={() => this.redirectWhenAuthd(<SignIn />)}
+          />
+          <Route
+            path="/signup"
+            render={() => this.redirectWhenAuthd(<SignUp />)}
+          />
+          <Route path="/signout" render={() => this.redirectWhenUnAthd()} />
+          <ProtectedRoute
+            path="/dashboard"
+            component={Dashboard}
+            isAuthenticated={this.props.isAuthenticated}
+          />
+        </div>
       </div>
     );
   }
 }
 
-export default App;
+const mapStateToProps = state => {
+  return {
+    isAuthenticated: state.auth.isAuthenticated
+  };
+};
+
+export default connect(mapStateToProps)(App);
